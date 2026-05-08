@@ -4,8 +4,7 @@ from typing import Optional, Dict
 
 app = FastAPI(title="OmniChannel AI Engine - Leomy Dev")
 
-# --- BASE DE CONHECIMENTO COMPLETA ---
-KKNOWLEDGE_BASE: Dict[str, Dict[str, str]] = {
+KNOWLEDGE_BASE = {
     "veterinario": {
         "vacinacao": "Trabalhamos com V10, Raiva e Gripe. É necessário trazer a carteirinha do pet.",
         "castracao": "O procedimento exige jejum de 8h. O valor varia conforme o peso do animal.",
@@ -27,35 +26,24 @@ KKNOWLEDGE_BASE: Dict[str, Dict[str, str]] = {
 }
 
 class WebhookPayload(BaseModel):
-    nicho: str  # 'veterinario', 'estetica' ou 'odonto'
+    nicho: str
     procedimento: str
     nome_cliente: Optional[str] = "Cliente"
 
 @app.post("/v1/atendimento")
 async def processar_atendimento(payload: WebhookPayload):
-    nicho_alvo = payload.nicho.lower()
-    servico_alvo = payload.procedimento.lower()
-
-    if nicho_alvo not in KNOWLEDGE_BASE:
+    nicho = payload.nicho.lower()
+    proc = payload.procedimento.lower()
+    
+    if nicho not in KNOWLEDGE_BASE:
         raise HTTPException(status_code=404, detail="Nicho não configurado.")
-
-    info = KNOWLEDGE_BASE[nicho_alvo].get(
-        servico_alvo, 
-        "Vou confirmar os detalhes com a nossa equipe técnica e te retorno em instantes."
-    )
-
-    resposta_final = (
-        f"Olá, {payload.nome_cliente}! ✨\n\n"
-        f"Sobre o seu interesse em *{payload.procedimento.title()}*:\n"
-        f"{info}\n\n"
-        "Gostaria de agendar uma avaliação agora ou prefere tirar mais alguma dúvida?"
-    )
-
+    
+    # Busca a informação ou retorna uma mensagem padrão amigável
+    resposta_texto = KNOWLEDGE_BASE[nicho].get(proc, "Vou confirmar os detalhes com a nossa equipe técnica e te retorno em instantes.")
+    
     return {
         "success": True,
-        "response_data": {"text": resposta_final}
+        "response_data": {
+            "text": f"Olá, {payload.nome_cliente}! ✨\n\nSobre o seu interesse em {proc.capitalize()}:\n{resposta_texto}\n\nGostaria de agendar agora ou prefere tirar mais alguma dúvida?"
+        }
     }
-
-@app.get("/status")
-async def check_status():
-    return {"status": "online", "engine": "Leomy AI v2.0.0"}
