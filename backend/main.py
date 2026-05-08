@@ -5,7 +5,7 @@ from typing import Optional, Dict
 app = FastAPI(title="OmniChannel AI Engine - Leomy Dev")
 
 # --- BASE DE CONHECIMENTO COMPLETA ---
-KNOWLEDGE_BASE: Dict[str, Dict[str, str]] = {
+KKNOWLEDGE_BASE: Dict[str, Dict[str, str]] = {
     "veterinario": {
         "vacinacao": "Trabalhamos com V10, Raiva e Gripe. É necessário trazer a carteirinha do pet.",
         "castracao": "O procedimento exige jejum de 8h. O valor varia conforme o peso do animal.",
